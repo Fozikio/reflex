@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """Rule evaluation engine for hookify plugin."""
 
+import copy
+import json
+import os
 import re
 import sys
+from datetime import datetime, timezone
 from functools import lru_cache
 from typing import List, Dict, Any, Optional
 
@@ -52,10 +56,31 @@ class RuleEngine:
 
         for rule in rules:
             if self._rule_matches(rule, input_data):
+                # Branch on strength before applying legacy action logic
+                if rule.strength == 'off':
+                    continue  # Skip entirely
+
+                if rule.strength == 'silent':
+                    self._write_telemetry(rule, hook_event)
+                    continue  # Log but don't show
+
+                if rule.strength == 'nudge':
+                    softened = self._soften_rule(rule)
+                    warning_rules.append(softened)
+                    self._write_telemetry(rule, hook_event)
+                    continue
+
+                if rule.strength == 'block':
+                    blocking_rules.append(rule)
+                    self._write_telemetry(rule, hook_event)
+                    continue
+
+                # 'enforce' — current default behavior: branch on rule.action
                 if rule.action == 'block':
                     blocking_rules.append(rule)
                 else:
                     warning_rules.append(rule)
+                self._write_telemetry(rule, hook_event)
 
         # If any blocking rules matched, block the operation
         if blocking_rules:
@@ -92,6 +117,33 @@ class RuleEngine:
 
         # No matches - allow operation
         return {}
+
+    def _soften_rule(self, rule: Rule) -> Rule:
+        """Create a copy of the rule with a softened message for nudge strength."""
+        softened = copy.copy(rule)
+        softened.message = f"Gentle reminder: {rule.message}"
+        return softened
+
+    def _write_telemetry(self, rule: Rule, hook_event: str) -> None:
+        """Write telemetry entry to .claude/state/hook-telemetry.jsonl"""
+        try:
+            telemetry_dir = os.path.join('.claude', 'state')
+            os.makedirs(telemetry_dir, exist_ok=True)
+            telemetry_file = os.path.join(telemetry_dir, 'hook-telemetry.jsonl')
+
+            entry = {
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'rule': rule.name,
+                'strength': rule.strength,
+                'category': rule.category,
+                'event': hook_event,
+                'matched': True,
+            }
+
+            with open(telemetry_file, 'a') as f:
+                f.write(json.dumps(entry) + '\n')
+        except Exception:
+            pass  # Telemetry is observability — never crash the caller
 
     def _rule_matches(self, rule: Rule, input_data: Dict[str, Any]) -> bool:
         """Check if rule matches input data.

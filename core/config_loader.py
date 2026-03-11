@@ -29,6 +29,10 @@ class Condition:
         )
 
 
+VALID_STRENGTHS = ('off', 'silent', 'nudge', 'enforce', 'block')
+VALID_CATEGORIES = ('training', 'production', 'safety')
+
+
 @dataclass
 class Rule:
     """A hookify rule."""
@@ -40,6 +44,8 @@ class Rule:
     action: str = "warn"  # "warn" or "block" (future)
     tool_matcher: Optional[str] = None  # Override tool matching
     message: str = ""  # Message body from markdown
+    strength: str = "enforce"    # off | silent | nudge | enforce | block
+    category: str = "production" # training | production | safety
 
     @classmethod
     def from_dict(cls, frontmatter: Dict[str, Any], message: str) -> 'Rule':
@@ -72,6 +78,17 @@ class Rule:
                 pattern=simple_pattern
             )]
 
+        # Parse strength and category with validation
+        raw_strength = frontmatter.get('strength', 'enforce')
+        strength = raw_strength if raw_strength in VALID_STRENGTHS else 'enforce'
+
+        raw_category = frontmatter.get('category', 'production')
+        category = raw_category if raw_category in VALID_CATEGORIES else 'production'
+
+        # Safety floor enforcement: safety rules can't go below enforce
+        if category == 'safety' and strength not in ('enforce', 'block'):
+            strength = 'enforce'
+
         return cls(
             name=frontmatter.get('name', 'unnamed'),
             enabled=frontmatter.get('enabled', True),
@@ -80,7 +97,9 @@ class Rule:
             conditions=conditions,
             action=frontmatter.get('action', 'warn'),
             tool_matcher=frontmatter.get('tool_matcher'),
-            message=message.strip()
+            message=message.strip(),
+            strength=strength,
+            category=category,
         )
 
 
