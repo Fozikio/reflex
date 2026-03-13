@@ -1,0 +1,16 @@
+name: destructive-commands
+version: 1
+tier: core
+category: safety
+description: Block catastrophic shell commands
+events: [bash_command]
+conditions:
+  - field: command
+    op: regex
+    pattern: "(rm\\s+-rf\\s+[/~.]|format\\s|diskpart|fdisk|mkfs|del\\s+/s\\s+/q)"
+action: block
+severity: critical
+message: "Destructive command blocked: {{command}}"
+override:
+  allow_disable: false
+  allow_downgrade: false

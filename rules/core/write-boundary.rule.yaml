@@ -1,0 +1,19 @@
+name: write-boundary
+version: 1
+tier: core
+category: safety
+description: Block file writes outside allowed locations
+events: [file_write, file_edit]
+conditions:
+  - field: file_path
+    op: not_matches
+    pattern: "{{allowed_roots}}"
+action: block
+severity: critical
+message: |
+  Write boundary violation.
+  Attempted to modify: {{file_path}}
+  Allowed roots: {{allowed_roots}}
+override:
+  allow_disable: false
+  allow_downgrade: false

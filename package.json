@@ -1,0 +1,27 @@
+{
+  "name": "@fozikio/reflex",
+  "version": "0.1.0",
+  "description": "Portable guardrails for any agent runtime — safety rules as data, not code",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": { "reflex": "dist/cli/index.js" },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": { "yaml": "^2.7.0" },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "files": ["dist", "rules", "LICENSE", "README.md"],
+  "exports": {
+    ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" }
+  },
+  "keywords": ["reflex", "guardrails", "safety", "ai-agent", "hooks", "mcp"],
+  "license": "MIT"
+}

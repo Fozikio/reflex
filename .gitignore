@@ -28,3 +28,8 @@ htmlcov/
 # Local configuration (should not be committed)
 .claude/*.local.md
 .claude/*.local.json
+
+# TypeScript / Node
+node_modules/
+dist/
+*.tsbuildinfo
