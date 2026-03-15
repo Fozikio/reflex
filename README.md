@@ -92,6 +92,7 @@ override:
 | `file_edit` | Existing file modification |
 | `file_delete` | File deletion |
 | `prompt_submit` | User prompt submission |
+| `session_start` | Agent session starting |
 | `session_stop` | Agent session ending |
 | `tool_call` | Any tool invocation |
 | `post_tool` | After a tool completes |
@@ -183,6 +184,12 @@ const config: ReflexConfig = {
   rule_dirs: ['./rules', './extra-rules'],
 };
 ```
+
+## Related Projects
+
+- [cortex-engine](https://github.com/Fozikio/cortex-engine) — Cognitive memory layer for AI agents (ships with Reflex rules)
+- [sigil](https://github.com/Fozikio/sigil) — Agent control surface
+- [fozikio.com](https://www.fozikio.com) — Documentation and guides
 
 ## Background
 

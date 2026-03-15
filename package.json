@@ -23,5 +23,15 @@
     ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" }
   },
   "keywords": ["reflex", "guardrails", "safety", "ai-agent", "hooks", "mcp"],
-  "license": "MIT"
+  "license": "MIT",
+  "author": "Fozikio <hello@fozikio.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Fozikio/reflex.git"
+  },
+  "homepage": "https://github.com/Fozikio/reflex#readme",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/Fozikio"
+  }
 }

@@ -4,6 +4,7 @@ export type ReflexEvent =
   | 'file_edit'
   | 'file_delete'
   | 'prompt_submit'
+  | 'session_start'
   | 'session_stop'
   | 'tool_call'
   | 'post_tool'
