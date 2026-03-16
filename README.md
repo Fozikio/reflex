@@ -185,11 +185,16 @@ const config: ReflexConfig = {
 };
 ```
 
+## Contributing
+
+See the [Contributing Guide](https://github.com/Fozikio/.github/blob/main/CONTRIBUTING.md). Report security issues via [SECURITY.md](https://github.com/Fozikio/.github/blob/main/SECURITY.md).
+
 ## Related Projects
 
 - [cortex-engine](https://github.com/Fozikio/cortex-engine) — Cognitive memory layer for AI agents (ships with Reflex rules)
 - [sigil](https://github.com/Fozikio/sigil) — Agent control surface
 - [fozikio.com](https://www.fozikio.com) — Documentation and guides
+- [r/fozikio](https://www.reddit.com/r/Fozikio/) — Community
 
 ## Background
 
