@@ -42,7 +42,11 @@
     "safety",
     "ai-agent",
     "hooks",
-    "mcp"
+    "mcp",
+    "fozikio",
+    "rules-engine",
+    "agent-safety",
+    "yaml-rules"
   ],
   "license": "MIT",
   "author": "Fozikio <hello@fozikio.com>",
