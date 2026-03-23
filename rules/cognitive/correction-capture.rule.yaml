@@ -1,0 +1,22 @@
+name: correction-capture
+version: 1
+tier: recommended
+category: cognitive
+description: >
+  Detects strong user corrections (caps, repeated punctuation, "stop", "never",
+  "don't") and warns the agent to save a feedback memory before continuing.
+  Prevents the same correction from being given repeatedly across sessions.
+events: [prompt_submit]
+conditions:
+  - field: prompt
+    op: regex
+    pattern: "([A-Z]{4,}.*[!]{2,}|[!]{3,}|\\b(STOP|NEVER|ALWAYS|EVERY\\s*TIME|DON'?T|GET RID|REMOVE|DELETE|WRONG|NO NO NO)\\b)"
+action: warn
+severity: high
+message: >
+  Strong correction detected. Before acting on this, save a feedback memory
+  capturing what went wrong and how to prevent it in future sessions.
+  Use the feedback memory type with Why and How-to-apply sections.
+override:
+  allow_disable: true
+  allow_downgrade: true

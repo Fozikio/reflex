@@ -93,23 +93,40 @@ export class RuleEngine {
       case 'not_contains': return !value.includes(pattern);
       case 'starts_with': return value.startsWith(pattern);
       case 'ends_with': return value.endsWith(pattern);
-      case 'regex': return new RegExp(pattern).test(value);
+      case 'regex': {
+        if (value.length > 10000) return false;
+        try {
+          return new RegExp(pattern).test(value);
+        } catch {
+          return false;
+        }
+      }
       case 'matches': {
+        if (value.length > 10000) return false;
         const patterns = pattern.split(',').map(p => p.trim());
         return patterns.some(p => {
           if (p.includes('*')) {
-            const regex = new RegExp('^' + p.replace(/\*/g, '.*') + '$');
-            return regex.test(value);
+            try {
+              const regex = new RegExp('^' + p.replace(/\*/g, '.*') + '$');
+              return regex.test(value);
+            } catch {
+              return false;
+            }
           }
           return value.startsWith(p);
         });
       }
       case 'not_matches': {
+        if (value.length > 10000) return false;
         const patterns = pattern.split(',').map(p => p.trim());
         return !patterns.some(p => {
           if (p.includes('*')) {
-            const regex = new RegExp('^' + p.replace(/\*/g, '.*') + '$');
-            return regex.test(value);
+            try {
+              const regex = new RegExp('^' + p.replace(/\*/g, '.*') + '$');
+              return regex.test(value);
+            } catch {
+              return false;
+            }
           }
           return value.startsWith(p);
         });

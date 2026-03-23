@@ -59,7 +59,13 @@ export async function loadRuleDirectory(dir: string, config?: ReflexConfig): Pro
       entry.isFile() &&
       (extname(entry.name) === '.yaml' || extname(entry.name) === '.yml')
     ) {
-      const rule = await loadRuleFile(fullPath);
+      let rule: ReflexRule;
+      try {
+        rule = await loadRuleFile(fullPath);
+      } catch (err) {
+        console.warn(`[reflex] Skipping malformed rule ${fullPath}: ${(err as Error).message}`);
+        continue;
+      }
 
       // Apply config overrides — silently ignore disable attempts on core rules
       if (config?.disabled_rules?.includes(rule.name)) {
