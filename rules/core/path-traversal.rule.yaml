@@ -1,5 +1,5 @@
 name: path-traversal
-version: 1
+version: 2
 tier: core
 category: safety
 description: Block delete commands with tilde or parent traversal in paths
@@ -7,7 +7,7 @@ events: [bash_command, file_delete]
 conditions:
   - field: command
     op: regex
-    pattern: "(rm|del|Remove-Item).*[~]|\\.\\."
+    pattern: "\\b(rm|rmdir|del|erase|Remove-Item)\\b[^;&|]*(~|\\.\\.)([\\\\/]|\\s|$)"
 action: block
 severity: critical
 message: "Path traversal in delete command blocked: {{command}}"

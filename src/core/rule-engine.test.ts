@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { RuleEngine } from './rule-engine.js';
 import { CORE_RULES } from './defaults.js';
+import { loadRuleDirectory } from './rule-loader.js';
 import type { ReflexRule } from './types.js';
 
 function rule(overrides: Partial<ReflexRule> = {}): ReflexRule {
@@ -326,5 +327,23 @@ describe('CORE_RULES', () => {
         content: 'const API_KEY = process.env.API_KEY',
       }),
     ).toBe(true);
+  });
+});
+
+describe('shipped rules/core YAML', () => {
+  it('matches CORE_RULES exactly — the package ships both, they must not drift', async () => {
+    const loaded = await loadRuleDirectory('rules/core');
+
+    expect(loaded.map(r => r.name).sort()).toEqual(CORE_RULES.map(r => r.name).sort());
+
+    for (const yaml of loaded) {
+      const ts = CORE_RULES.find(r => r.name === yaml.name);
+      expect(ts, yaml.name).toBeDefined();
+      expect(yaml.version, yaml.name).toBe(ts!.version);
+      expect(yaml.conditions, yaml.name).toEqual(ts!.conditions);
+      expect(yaml.action, yaml.name).toBe(ts!.action);
+      expect(yaml.severity, yaml.name).toBe(ts!.severity);
+      expect(yaml.override, yaml.name).toEqual(ts!.override);
+    }
   });
 });
