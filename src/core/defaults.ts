@@ -40,13 +40,21 @@ export const CORE_RULES: ReflexRule[] = [
   },
   {
     name: 'path-traversal',
-    version: 1,
+    version: 2,
     tier: 'core',
     category: 'safety',
     description: 'Block delete commands with tilde or parent traversal in paths',
     events: ['bash_command', 'file_delete'],
     conditions: [
-      { field: 'command', op: 'regex', pattern: '(rm|del|Remove-Item).*[~]|\\.\\.' },
+      // The traversal must belong to a delete verb in the SAME command segment.
+      // v1 was `(rm|del|Remove-Item).*[~]|\\.\\.`, whose top-level alternation let
+      // the second branch match any command containing '..' — `cd ../src && npm test`
+      // was hard-blocked as a delete. `[^;&|]*` keeps verb and path in one segment.
+      {
+        field: 'command',
+        op: 'regex',
+        pattern: '\\b(rm|rmdir|del|erase|Remove-Item)\\b[^;&|]*(~|\\.\\.)([\\\\/]|\\s|$)',
+      },
     ],
     action: 'block',
     severity: 'critical',

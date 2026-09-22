@@ -247,6 +247,74 @@ describe('CORE_RULES', () => {
     expect(blocked.map(r => r.rule)).toContain('credential-protection');
   });
 
+  it('block a delete that walks out of the tree or into home', () => {
+    const engine = new RuleEngine({ allowed_roots: ['D:/Ida-Fozikio*'] });
+    engine.addRules(CORE_RULES);
+
+    const blocked = [
+      'rm -rf ~',
+      'rm -rf ~/projects',
+      'rm -rf ../src',
+      'rm -r ../../etc',
+      'rmdir ../old',
+      'del ..\\build',
+      'erase ..\\a',
+      'Remove-Item -Recurse ..\\build',
+      'git rm ../old.txt',
+      'sudo rm -rf ~/x',
+      'ls && rm -rf ~',
+    ];
+
+    for (const command of blocked) {
+      expect(
+        engine.getBlocks({ event: 'bash_command', command }).map(r => r.rule),
+        command,
+      ).toContain('path-traversal');
+    }
+  });
+
+  it('do not treat a bare .. as a delete (regression: v1 blocked every relative path)', () => {
+    const engine = new RuleEngine({ allowed_roots: ['D:/Ida-Fozikio*'] });
+    engine.addRules(CORE_RULES);
+
+    const allowed = [
+      'cd ../src && npm test',
+      'npm run build -- --out ../dist',
+      'cat ../README.md',
+      'tar -xf ../a.tar',
+      'ls ..',
+      'cd ..',
+      'grep -rn foo ../src',
+    ];
+
+    for (const command of allowed) {
+      expect(engine.isAllowed({ event: 'bash_command', command }), command).toBe(true);
+    }
+  });
+
+  it('do not let a delete in one segment arm a .. in another', () => {
+    const engine = new RuleEngine({ allowed_roots: ['D:/Ida-Fozikio*'] });
+    engine.addRules(CORE_RULES);
+
+    expect(engine.isAllowed({ event: 'bash_command', command: 'echo rm ; cd ..' })).toBe(true);
+    expect(engine.isAllowed({ event: 'bash_command', command: 'rm build/old.txt | grep ..' })).toBe(true);
+  });
+
+  it('do not match a delete verb inside a longer word', () => {
+    const engine = new RuleEngine({ allowed_roots: ['D:/Ida-Fozikio*'] });
+    engine.addRules(CORE_RULES);
+
+    expect(engine.isAllowed({ event: 'bash_command', command: 'charm ..' })).toBe(true);
+    expect(engine.isAllowed({ event: 'bash_command', command: 'npm i rimraf ../pkg' })).toBe(true);
+  });
+
+  it('do not match two dots inside a filename', () => {
+    const engine = new RuleEngine({ allowed_roots: ['D:/Ida-Fozikio*'] });
+    engine.addRules(CORE_RULES);
+
+    expect(engine.isAllowed({ event: 'bash_command', command: 'rm file..txt' })).toBe(true);
+  });
+
   it('do not flag an env-var reference as a hardcoded credential', () => {
     const engine = new RuleEngine({ allowed_roots: ['D:/Ida-Fozikio*'] });
     engine.addRules(CORE_RULES);
